@@ -3,7 +3,6 @@ import pandas as pd
 import datetime
 import pytz
 
-
 # Função para verificar o login
 def verificar_login(usuario, senha):
     usuarios_validos = {
@@ -13,7 +12,6 @@ def verificar_login(usuario, senha):
         'ENG. ALTEMAR JÚNIOR': '12345', 'ENG. LUAN DEMARCO': '12345', 'TÉC. JOSÉ BRAZ': '12345'
     }
     
-    # Verificar se o usuário existe no dicionário e se a senha bate
     return usuario in usuarios_validos and usuarios_validos[usuario] == senha
 
 # Função para carregar check-ins do arquivo
@@ -42,7 +40,7 @@ def atualizar_checkout(checkin_atualizado):
             
     df.to_excel('dados_checkin_checkout.xlsx', index=False)
 
-# Função para exibir o formulário de check-in de veículo
+# Função para exibir o formulário de check-in de veículo com verificação de check-out pendente
 def exibir_formulario_checkin(usuario):
     st.title("CONTROLE DE VEÍCULOS - CHECK-IN")
 
@@ -61,36 +59,41 @@ def exibir_formulario_checkin(usuario):
     if destino == 'Outro...':
         destino = st.text_input("ESCREVA O LOCAL DE DESTINO", "")
 
+    # Verificar check-out pendente para o carro selecionado
+    df = carregar_checkins()
+    checkin_aberto = df[(df['carro'] == carro) & (df['km_final'].isna())]
 
-    # Definir o fuso horário do Amazonas (UTC-4)
-    fuso_amazonas = pytz.timezone('America/Manaus')
+    if not checkin_aberto.empty:
+        usuario_pendente = checkin_aberto.iloc[0]['usuario']
+        st.warning(f"O usuário {usuario_pendente} não realizou check-out para o veículo {carro}. Consulte-o para liberar o check-in.")
+    else:
+        # Definir o fuso horário do Amazonas (UTC-4)
+        fuso_amazonas = pytz.timezone('America/Manaus')
 
         # Obter a data e hora atual (horário local)
-    data_hora_local = datetime.datetime.now()
+        data_hora_local = datetime.datetime.now()
 
-    # Ajustar para o fuso horário do Amazonas (UTC-4), subtraindo 4 horas
-    data_hora_checkin= data_hora_local - datetime.timedelta(hours=4)
-    data_hora_checkout= data_hora_local - datetime.timedelta(hours=4)
-    # Exemplo de DataFrame com a hora ajustada
-    df = pd.DataFrame({
-        'Data': [data_hora_checkin, data_hora_checkout]
-    })
+        # Ajustar para o fuso horário do Amazonas (UTC-4)
+        data_hora_checkin = data_hora_local - datetime.timedelta(hours=4)
 
-    if st.button("REGISTRAR CHECK-IN"):
-        if carro and km_inicial and origem and destino:
-            checkin = {
-                "carro": carro,
-                "km_inicial": km_inicial,
-                "km_final": None,  
-                "origem": origem,
-                "destino": destino,
-                "usuario": usuario,
-                "data_hora_checkin": data_hora_checkin,                 
-            }
-            salvar_checkin(checkin)
-            st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
-        else:
-            st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
+        if st.button("REGISTRAR CHECK-IN"):
+            if carro and km_inicial and origem and destino:
+                checkin = {
+                    "carro": carro,
+                    "km_inicial": km_inicial,
+                    "km_final": None,
+                    "origem": origem,
+                    "destino": destino,
+                    "usuario": usuario,
+                    "data_hora_checkin": data_hora_checkin,
+                }
+                salvar_checkin(checkin)
+                st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
+            else:
+                st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
+
+# Outras funções permanecem iguais...
+
 
 # Função para exibir o formulário de check-out de veículo
 def exibir_formulario_checkout(usuario):
