@@ -49,17 +49,18 @@ def exibir_formulario_checkin(usuario):
                             'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
     carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
     
-    # Buscar o último check-out registrado para o carro selecionado
+    # Carregar o último km final para o carro selecionado
     df = carregar_checkins()
-    ultimo_checkin = df[(df['carro'] == carro) & (df['km_final'].notna())].sort_values(by='data_hora_checkout', ascending=False).head(1)
+    checkin_aberto = df[(df['carro'] == carro) & (df['km_final'].notna())]  # Filtrar check-ins que já têm km_final
+    if not checkin_aberto.empty:
+        ultimo_km = checkin_aberto.iloc[-1]['km_final']  # Pega o último km final
+    else:
+        ultimo_km = 0  # Caso não haja check-in anterior, começa do km 0
     
-    # Se houver um último check-out, preencher o KM INICIAL com o KM FINAL do último check-out
-    km_inicial_default = 0
-    if not ultimo_checkin.empty:
-        km_inicial_default = ultimo_checkin['km_final'].values[0]
+    # Exibir o último km como valor de km inicial, sem permitir edição
+    st.write(f"KM INICIAL: {ultimo_km}")
 
-
-    km_inicial = st.number_input("KM INICIAL", min_value=0, value=km_inicial_default, key="km_inicial")
+    km_inicial = ultimo_km 
 
     
     locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA','BR-230/AM - SENTIDO APUÍ',
