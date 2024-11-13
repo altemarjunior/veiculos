@@ -48,7 +48,19 @@ def exibir_formulario_checkin(usuario):
                            'HILLUX PRATA - OVT-9G29', 'HILLUX PRATA - PAB-4F32', 'ONIX - QRA-4B06', 'ONIX - QTG-5C61',
                             'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
     carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
-    km_inicial = st.number_input("KM INICIAL", min_value=0, key="km_inicial")
+    
+    # Buscar o último check-out registrado para o carro selecionado
+    df = carregar_checkins()
+    ultimo_checkin = df[(df['carro'] == carro) & (df['km_final'].notna())].sort_values(by='data_hora_checkout', ascending=False).head(1)
+    
+    # Se houver um último check-out, preencher o KM INICIAL com o KM FINAL do último check-out
+    km_inicial_default = 0
+    if not ultimo_checkin.empty:
+        km_inicial_default = ultimo_checkin['km_final'].values[0]
+
+
+    km_inicial = st.number_input("KM INICIAL", min_value=0, value=km_inicial_default, key="km_inicial")
+
     
     locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA','BR-230/AM - SENTIDO APUÍ',
               'BR-317/AM', 'LABORATÓRIO', 'ALOJAMENTO', 'POSTO DE COMBUSTÍVEL', 'PORTO VELHO-RO']
