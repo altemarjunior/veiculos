@@ -80,7 +80,7 @@ def exibir_formulario_checkin(usuario):
         # Ajustar para o fuso horário do Amazonas (UTC-4)
         data_hora_checkin = data_hora_local - datetime.timedelta(hours=4)
 
-       if st.button("REGISTRAR CHECK-IN"):
+    if st.button("REGISTRAR CHECK-IN"):
     # Permitir que `km_inicial` seja zero e continue com o check-in
     if carro and (km_inicial is not None) and origem and destino:
         checkin = {
