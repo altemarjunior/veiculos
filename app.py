@@ -13,12 +13,11 @@ def verificar_login(usuario, senha):
     }
     
     return usuario in usuarios_validos and usuarios_validos[usuario] == senha
-import streamlit as st
 
 # Função para mudar a senha
 def mudar_senha(usuario):
     st.title("Alterar Senha")
-    
+
     # Entrada para a senha atual
     senha_atual = st.text_input("Digite sua senha atual", type="password")
     
@@ -48,12 +47,13 @@ def mudar_senha(usuario):
 # Função fictícia para verificar a senha atual (exemplo)
 def verificar_senha_atual(usuario, senha_atual):
     # Aqui você pode integrar com seu banco de dados ou sistema de autenticação
+    # Exemplo: Verifique no banco de dados se a senha atual está correta
     return True  # Retorna True caso a senha atual seja válida
 
 # Função fictícia para atualizar a senha (exemplo)
 def atualizar_senha(usuario, nova_senha):
     # Aqui você pode integrar com seu banco de dados ou sistema de autenticação
-    # Exemplo de atualização de senha (no banco de dados)
+    # Exemplo: Atualizar a senha no banco de dados
     # db.atualizar_senha(usuario, nova_senha)
     return True  # Retorna True se a senha foi atualizada com sucesso
 
