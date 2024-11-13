@@ -90,7 +90,7 @@ def exibir_formulario_checkin(usuario):
         data_hora_checkin = data_hora_local - datetime.timedelta(hours=4)
 
         if st.button("REGISTRAR CHECK-IN"):
-            if carro and km_inicial and origem and destino:
+            if carro and km_inicial >= 0 and origem and destino:
                 checkin = {
                     "carro": carro,
                     "km_inicial": km_inicial,
