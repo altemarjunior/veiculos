@@ -11,7 +11,6 @@ def verificar_login(usuario, senha):
         'ADM. VÍTALLO RAONY': '12345', 'TÉC. EVELYN FERNANDEZ': '12345', 'COORD. GENILSON MEDEIROS': '12345', 'TÉC. MARCELO BRITO': '12345',
         'ENG. ALTEMAR JÚNIOR': '12345', 'ENG. LUAN DEMARCO': '12345', 'TÉC. JOSÉ BRAZ': '12345'
     }
-    
     return usuario in usuarios_validos and usuarios_validos[usuario] == senha
 
 # Função para carregar check-ins do arquivo
@@ -45,12 +44,18 @@ def exibir_formulario_checkin(usuario):
     st.title("CONTROLE DE VEÍCULOS - CHECK-IN")
 
     carros_disponiveis = ['HILLUX PRATA - JKE-2B37 ', 'HILLUX PRATA - NUJ-4B69', 'HILLUX PRATA- OHP-4744',
-                           'HILLUX PRATA - OVT-9G29', 'HILLUX PRATA - PAB-4F32', 'ONIX - QRA-4B06', 'ONIX - QTG-5C61',
-                            'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
+                          'HILLUX PRATA - OVT-9G29', 'HILLUX PRATA - PAB-4F32', 'ONIX - QRA-4B06', 'ONIX - QTG-5C61',
+                          'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
     carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
-    km_inicial = st.number_input("KM INICIAL", min_value=0, key="km_inicial")
     
-    locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA','BR-230/AM - SENTIDO APUÍ',
+    # Obter o último km_final do veículo selecionado
+    df = carregar_checkins()
+    ultimo_km_final = df[(df['carro'] == carro) & (df['km_final'].notna())].sort_values(by='data_hora_checkout', ascending=False)['km_final'].head(1)
+    km_inicial = ultimo_km_final.iloc[0] if not ultimo_km_final.empty else 0  # Km inicial é o último km final registrado
+
+    st.number_input("KM INICIAL", min_value=0, value=km_inicial, key="km_inicial", disabled=True)
+    
+    locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA', 'BR-230/AM - SENTIDO APUÍ',
               'BR-317/AM', 'LABORATÓRIO', 'ALOJAMENTO', 'POSTO DE COMBUSTÍVEL', 'PORTO VELHO-RO']
     origem = st.selectbox("LOCAL DE ORIGEM", locais + ['Outro...'], key="origem")
     if origem == 'Outro...':
@@ -60,7 +65,6 @@ def exibir_formulario_checkin(usuario):
         destino = st.text_input("ESCREVA O LOCAL DE DESTINO", "")
 
     # Verificar check-out pendente para o carro selecionado
-    df = carregar_checkins()
     checkin_aberto = df[(df['carro'] == carro) & (df['km_final'].isna())]
 
     if not checkin_aberto.empty:
@@ -94,36 +98,6 @@ def exibir_formulario_checkin(usuario):
 
 # Outras funções permanecem iguais...
 
-
-# Função para exibir o formulário de check-out de veículo
-def exibir_formulario_checkout(usuario):
-    st.title("CONTROLE DE VEÍCULOS - CHECK-OUT")
-
-    df = carregar_checkins()
-    checkins_abertos = df[(df['usuario'] == usuario) & (df['km_final'].isna())]
-
-    if not checkins_abertos.empty:
-        checkin_selecionado = st.selectbox("Escolha o Check-in em Aberto", checkins_abertos.index, format_func=lambda idx: f"{checkins_abertos.loc[idx, 'carro']} - {checkins_abertos.loc[idx, 'origem']} para {checkins_abertos.loc[idx, 'destino']}")
-        km_final = st.number_input("KM FINAL", min_value=0)
-
-        if st.button("REGISTRAR CHECK-OUT"):
-            if km_final:
-                checkin_atualizado = checkins_abertos.loc[checkin_selecionado].to_dict()
-                checkin_atualizado['km_final'] = km_final
-                checkin_atualizado['data_hora_checkout'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                atualizar_checkout(checkin_atualizado)
-                st.success(f"CHECK-OUT REALIZADO COM SUCESSO PARA O CARRO {checkin_atualizado['carro']}!")
-            else:
-                st.error("POR FAVOR, PREENCHA O KM FINAL.")
-    else:
-        st.warning("NÃO HÁ CHECK-IN EM ABERTO PARA ESTE USUÁRIO.")
-
-# Função para exibir apenas a visualização de registros para a coordenação
-def exibir_visualizacao_coordenação():
-    st.title("Visualização de Registros de Check-in e Check-out")
-    df = carregar_checkins()
-    st.write(df)
-
 # Função principal do aplicativo
 def app():
     if 'login' not in st.session_state or not st.session_state.login:
@@ -136,7 +110,6 @@ def app():
             'ENG. LUIZ NEVES', 'COORD. GENILSON MEDEIROS'
         ]
         
-        # Ordenar a lista de usuários de forma crescente
         usuarios.sort()
 
         usuario_selecionado = st.selectbox("ESCOLHA O USUÁRIO", [''] + usuarios)
@@ -159,16 +132,6 @@ def app():
                 exibir_formulario_checkin(st.session_state.usuario)
             elif escolha == 'Check-out':
                 exibir_formulario_checkout(st.session_state.usuario)
-
-
-# Função para limpar a planilha
-#def limpar_planilha():
-    # Cria um DataFrame vazio com as colunas da planilha
-    #df_vazio = pd.DataFrame(columns=['carro', 'km_inicial', 'km_final', 'origem', 'destino', 'usuario', 'data_hora_checkin', 'data_hora_checkout'])
-    
-    # Sobrescreve o arquivo Excel com o DataFrame vazio
-    #df_vazio.to_excel('dados_checkin_checkout.xlsx', index=False)
-#limpar_planilha()
 
 if __name__ == "__main__":
     app()
