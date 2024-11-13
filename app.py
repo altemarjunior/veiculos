@@ -36,7 +36,6 @@ def atualizar_checkout(checkin_atualizado):
             pd.isna(row['km_final'])):
             df.at[index, 'km_final'] = checkin_atualizado['km_final']
             df.at[index, 'data_hora_checkout'] = checkin_atualizado['data_hora_checkout']
-            
     df.to_excel('dados_checkin_checkout.xlsx', index=False)
 
 # Função para exibir o formulário de check-in de veículo com verificação de check-out pendente
@@ -80,24 +79,22 @@ def exibir_formulario_checkin(usuario):
         # Ajustar para o fuso horário do Amazonas (UTC-4)
         data_hora_checkin = data_hora_local - datetime.timedelta(hours=4)
 
-    if st.button("REGISTRAR CHECK-IN"):
-    # Permitir que `km_inicial` seja zero e continue com o check-in
-    if carro and (km_inicial is not None) and origem and destino:
-        checkin = {
-            "carro": carro,
-            "km_inicial": km_inicial,
-            "km_final": None,
-            "origem": origem,
-            "destino": destino,
-            "usuario": usuario,
-            "data_hora_checkin": data_hora_checkin,
-        }
-        salvar_checkin(checkin)
-        st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
-    else:
-        st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
-
-
+        if st.button("REGISTRAR CHECK-IN"):
+            # Permitir que `km_inicial` seja zero e continue com o check-in
+            if carro and (km_inicial is not None) and origem and destino:
+                checkin = {
+                    "carro": carro,
+                    "km_inicial": km_inicial,
+                    "km_final": None,
+                    "origem": origem,
+                    "destino": destino,
+                    "usuario": usuario,
+                    "data_hora_checkin": data_hora_checkin,
+                }
+                salvar_checkin(checkin)
+                st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
+            else:
+                st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
 
 # Outras funções permanecem iguais...
 
