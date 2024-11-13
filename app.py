@@ -14,49 +14,6 @@ def verificar_login(usuario, senha):
     
     return usuario in usuarios_validos and usuarios_validos[usuario] == senha
 
-# Função para mudar a senha
-def mudar_senha(usuario):
-    st.title("Alterar Senha")
-
-    # Entrada para a senha atual
-    senha_atual = st.text_input("Digite sua senha atual", type="password")
-    
-    # Entrada para a nova senha
-    nova_senha = st.text_input("Digite a nova senha", type="password")
-    
-    # Confirmação da nova senha
-    confirmar_senha = st.text_input("Confirme a nova senha", type="password")
-    
-    # Botão para alterar a senha
-    if st.button("Alterar Senha"):
-        if senha_atual and nova_senha and confirmar_senha:
-            if nova_senha == confirmar_senha:
-                if verificar_senha_atual(usuario, senha_atual):  # Função fictícia de verificação
-                    # Atualiza a senha no banco de dados
-                    if atualizar_senha(usuario, nova_senha):  # Função fictícia de atualização
-                        st.success("Senha alterada com sucesso!")
-                    else:
-                        st.error("Erro ao alterar a senha. Tente novamente.")
-                else:
-                    st.error("Senha atual incorreta.")
-            else:
-                st.error("As senhas não coincidem.")
-        else:
-            st.error("Por favor, preencha todos os campos.")
-
-# Função fictícia para verificar a senha atual (exemplo)
-def verificar_senha_atual(usuario, senha_atual):
-    # Aqui você pode integrar com seu banco de dados ou sistema de autenticação
-    # Exemplo: Verifique no banco de dados se a senha atual está correta
-    return True  # Retorna True caso a senha atual seja válida
-
-# Função fictícia para atualizar a senha (exemplo)
-def atualizar_senha(usuario, nova_senha):
-    # Aqui você pode integrar com seu banco de dados ou sistema de autenticação
-    # Exemplo: Atualizar a senha no banco de dados
-    # db.atualizar_senha(usuario, nova_senha)
-    return True  # Retorna True se a senha foi atualizada com sucesso
-
 # Função para carregar check-ins do arquivo
 def carregar_checkins():
     try:
@@ -121,7 +78,7 @@ def exibir_formulario_checkin(usuario):
 
     if not checkin_aberto.empty:
         usuario_pendente = checkin_aberto.iloc[0]['usuario']
-        st.warning(f"O USUÁRIO {usuario_pendente} NÃO REALIZOU CHECK-OUT PARA O VEÍCULO {carro}. CONSULTE-O PARA LIBERAR O SEU CHECK-IN.")
+        st.warning(f"O usuário {usuario_pendente} não realizou check-out para o veículo {carro}. Consulte-o para liberar o check-in.")
     else:
         # Definir o fuso horário do Amazonas (UTC-4)
         fuso_amazonas = pytz.timezone('America/Manaus')
