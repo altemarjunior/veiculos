@@ -98,6 +98,7 @@ def exibir_formulario_checkin(usuario):
         st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
 
 
+
 # Outras funções permanecem iguais...
 
 # Função principal do aplicativo
