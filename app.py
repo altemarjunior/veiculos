@@ -96,7 +96,34 @@ def exibir_formulario_checkin(usuario):
             else:
                 st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
 
-# Outras funções permanecem iguais...
+# Função para exibir o formulário de check-out de veículo
+def exibir_formulario_checkout(usuario):
+    st.title("CONTROLE DE VEÍCULOS - CHECK-OUT")
+    
+    df = carregar_checkins()
+    checkins_abertos = df[(df['usuario'] == usuario) & (df['km_final'].isna())]
+
+    if not checkins_abertos.empty:
+        carro = st.selectbox("ESCOLHA O VEÍCULO PARA CHECK-OUT", checkins_abertos['carro'].unique())
+        km_final = st.number_input("KM FINAL", min_value=0)
+        
+        # Definir o fuso horário do Amazonas (UTC-4)
+        fuso_amazonas = pytz.timezone('America/Manaus')
+        
+        # Obter a data e hora atual (horário local) ajustado para UTC-4
+        data_hora_checkout = datetime.datetime.now() - datetime.timedelta(hours=4)
+
+        if st.button("REGISTRAR CHECK-OUT"):
+            checkin_atualizado = {
+                "carro": carro,
+                "km_final": km_final,
+                "usuario": usuario,
+                "data_hora_checkout": data_hora_checkout,
+            }
+            atualizar_checkout(checkin_atualizado)
+            st.success(f"CHECK-OUT REALIZADO COM SUCESSO PARA O CARRO {carro}!")
+    else:
+        st.info("Nenhum check-in pendente para este usuário.")
 
 # Função principal do aplicativo
 def app():
@@ -112,26 +139,32 @@ def app():
         
         usuarios.sort()
 
-        usuario_selecionado = st.selectbox("ESCOLHA O USUÁRIO", [''] + usuarios)
-        
+        usuario_selecionado = st.selectbox("USUÁRIO", usuarios)
         senha = st.text_input("SENHA", type="password")
-        
-        if st.button("Entrar"):
-            if usuario_selecionado and verificar_login(usuario_selecionado, senha):
+
+        if st.button("FAZER LOGIN"):
+            if verificar_login(usuario_selecionado, senha):
                 st.session_state.login = True
                 st.session_state.usuario = usuario_selecionado
-                st.success("LOGIN BEM-SUCEDIDO!")
+                st.success(f"Bem-vindo, {usuario_selecionado}!")
+                app_principal()
             else:
-                st.error("USUÁRIO OU SENHA INCORRETOS.")
+                st.error("Usuário ou senha incorretos.")
     else:
-        if st.session_state.usuario == 'COORDENAÇÃO':
-            exibir_visualizacao_coordenação()
-        else:
-            escolha = st.radio("ESCOLHA UMA OPÇÃO", ('Check-in', 'Check-out'))
-            if escolha == 'Check-in':
-                exibir_formulario_checkin(st.session_state.usuario)
-            elif escolha == 'Check-out':
-                exibir_formulario_checkout(st.session_state.usuario)
+        app_principal()
 
+# Função principal do aplicativo após o login
+def app_principal():
+    usuario = st.session_state.usuario
+    
+    menu = ["Check-in", "Check-out"]
+    opcao = st.sidebar.radio("Selecione uma opção", menu)
+
+    if opcao == "Check-in":
+        exibir_formulario_checkin(usuario)
+    elif opcao == "Check-out":
+        exibir_formulario_checkout(usuario)
+
+# Iniciar o aplicativo
 if __name__ == "__main__":
     app()
