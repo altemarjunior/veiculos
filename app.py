@@ -57,7 +57,7 @@ def exibir_formulario_checkout(usuario):
         st.info("Nenhum check-in pendente para este usuário.")
 
 # Função principal
-def main():
+def app():
     st.sidebar.title("Menu")
     usuario = st.sidebar.text_input("Digite seu nome de usuário:")
 
