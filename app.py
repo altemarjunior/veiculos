@@ -48,12 +48,7 @@ def exibir_formulario_checkin(usuario):
                            'HILLUX PRATA - OVT-9G29', 'HILLUX PRATA - PAB-4F32', 'ONIX - QRA-4B06', 'ONIX - QTG-5C61',
                             'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
     carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
-    
-    # Verificar o último km final registrado para o carro
-    df = carregar_checkins()
-    ultimo_checkin = df[(df['carro'] == carro) & (df['km_final'].notna())].sort_values(by='data_hora_checkout', ascending=False).head(1)
-    
-    km_inicial = st.number_input("KM INICIAL", min_value=0, value=ultimo_checkin['km_final'].iloc[0] if not ultimo_checkin.empty else 0, key="km_inicial")
+    km_inicial = st.number_input("KM INICIAL", min_value=0, key="km_inicial")
     
     locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA','BR-230/AM - SENTIDO APUÍ',
               'BR-317/AM', 'LABORATÓRIO', 'ALOJAMENTO', 'POSTO DE COMBUSTÍVEL', 'PORTO VELHO-RO']
@@ -65,6 +60,7 @@ def exibir_formulario_checkin(usuario):
         destino = st.text_input("ESCREVA O LOCAL DE DESTINO", "")
 
     # Verificar check-out pendente para o carro selecionado
+    df = carregar_checkins()
     checkin_aberto = df[(df['carro'] == carro) & (df['km_final'].isna())]
 
     if not checkin_aberto.empty:
@@ -95,6 +91,9 @@ def exibir_formulario_checkin(usuario):
                 st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
             else:
                 st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
+
+# Outras funções permanecem iguais...
+
 
 # Função para exibir o formulário de check-out de veículo
 def exibir_formulario_checkout(usuario):
@@ -133,30 +132,43 @@ def app():
         usuarios = [
             'COORDENAÇÃO', 'TÉC. LUIZ ANDRÉ', 'TÉC. RAFAEL PORTO', 'TÉC. MARCELO BRITO', 'TÉC. JOSÉ BRAZ',
             'TÉC. ANDERSON ALVES', 'TÉC. AILSON SILVA', 'ADM. VÍTALLO RAONY', 'TÉC. EVELYN FERNANDEZ', 
-            'ENG. PAULO VICTOR', 'ENG. JOSÉ UILIAN', 'ENG. ALTEMAR JÚNIOR', 'ENG. LUAN DEMARCO'
+            'ENG. PAULO VICTOR', 'ENG. JOSÉ UILIAN', 'ENG. ALTEMAR JÚNIOR', 'ENG. LUAN DEMARCO', 
+            'ENG. LUIZ NEVES', 'COORD. GENILSON MEDEIROS'
         ]
         
-        usuario = st.selectbox("Usuário", usuarios)
-        senha = st.text_input("Senha", type="password")
+        # Ordenar a lista de usuários de forma crescente
+        usuarios.sort()
+
+        usuario_selecionado = st.selectbox("ESCOLHA O USUÁRIO", [''] + usuarios)
+        
+        senha = st.text_input("SENHA", type="password")
         
         if st.button("Entrar"):
-            if verificar_login(usuario, senha):
+            if usuario_selecionado and verificar_login(usuario_selecionado, senha):
                 st.session_state.login = True
-                st.session_state.usuario = usuario
-                st.success(f"Bem-vindo(a), {usuario}!")
+                st.session_state.usuario = usuario_selecionado
+                st.success("LOGIN BEM-SUCEDIDO!")
             else:
-                st.error("Usuário ou senha inválidos.")
-    
-    if 'login' in st.session_state and st.session_state.login:
+                st.error("USUÁRIO OU SENHA INCORRETOS.")
+    else:
         if st.session_state.usuario == 'COORDENAÇÃO':
             exibir_visualizacao_coordenação()
         else:
-            opcao = st.selectbox("Escolha uma opção", ["Check-in", "Check-out"])
-
-            if opcao == "Check-in":
+            escolha = st.radio("ESCOLHA UMA OPÇÃO", ('Check-in', 'Check-out'))
+            if escolha == 'Check-in':
                 exibir_formulario_checkin(st.session_state.usuario)
-            elif opcao == "Check-out":
+            elif escolha == 'Check-out':
                 exibir_formulario_checkout(st.session_state.usuario)
 
-if __name__ == '__main__':
-    app()
+
+# Função para limpar a planilha
+#def limpar_planilha():
+    # Cria um DataFrame vazio com as colunas da planilha
+    #df_vazio = pd.DataFrame(columns=['carro', 'km_inicial', 'km_final', 'origem', 'destino', 'usuario', 'data_hora_checkin', 'data_hora_checkout'])
+    
+    # Sobrescreve o arquivo Excel com o DataFrame vazio
+    #df_vazio.to_excel('dados_checkin_checkout.xlsx', index=False)
+#limpar_planilha()
+
+if __name__ == "__main__":
+    app(). 
