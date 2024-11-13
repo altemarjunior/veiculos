@@ -48,7 +48,12 @@ def exibir_formulario_checkin(usuario):
                            'HILLUX PRATA - OVT-9G29', 'HILLUX PRATA - PAB-4F32', 'ONIX - QRA-4B06', 'ONIX - QTG-5C61',
                             'SAVEIRO BRANCA - QTF-2G13', 'STRADA BRANCA - QTG-4D21', 'STRADA CINZA - THJ-2D86']
     carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
-    km_inicial = st.number_input("KM INICIAL", min_value=0, key="km_inicial")
+    
+    # Verificar o último km final registrado para o carro
+    df = carregar_checkins()
+    ultimo_checkin = df[(df['carro'] == carro) & (df['km_final'].notna())].sort_values(by='data_hora_checkout', ascending=False).head(1)
+    
+    km_inicial = st.number_input("KM INICIAL", min_value=0, value=ultimo_checkin['km_final'].iloc[0] if not ultimo_checkin.empty else 0, key="km_inicial")
     
     locais = ['ESCRITÓRIO', 'UNIDADE LOCAL - HUMAITÁ', 'MANAUS', 'BR-319/AM - SENTIDO MANAUS', 'BR-319/AM - SENTIDO PORTO VELHO-RO', 'BR-230/AM - SENTIDO LÁBREA','BR-230/AM - SENTIDO APUÍ',
               'BR-317/AM', 'LABORATÓRIO', 'ALOJAMENTO', 'POSTO DE COMBUSTÍVEL', 'PORTO VELHO-RO']
@@ -60,7 +65,6 @@ def exibir_formulario_checkin(usuario):
         destino = st.text_input("ESCREVA O LOCAL DE DESTINO", "")
 
     # Verificar check-out pendente para o carro selecionado
-    df = carregar_checkins()
     checkin_aberto = df[(df['carro'] == carro) & (df['km_final'].isna())]
 
     if not checkin_aberto.empty:
@@ -106,14 +110,10 @@ def exibir_formulario_checkout(usuario):
         if st.button("REGISTRAR CHECK-OUT"):
             if km_final:
                 checkin_atualizado = checkins_abertos.loc[checkin_selecionado].to_dict()
-                # Verifica se o km final não é menor que o km inicial
-                if km_final < checkin_atualizado['km_inicial']:
-                    st.error("O KM FINAL não pode ser menor que o KM INICIAL.")
-                else:
-                    checkin_atualizado['km_final'] = km_final
-                    checkin_atualizado['data_hora_checkout'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    atualizar_checkout(checkin_atualizado)
-                    st.success(f"CHECK-OUT REALIZADO COM SUCESSO PARA O CARRO {checkin_atualizado['carro']}!")
+                checkin_atualizado['km_final'] = km_final
+                checkin_atualizado['data_hora_checkout'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                atualizar_checkout(checkin_atualizado)
+                st.success(f"CHECK-OUT REALIZADO COM SUCESSO PARA O CARRO {checkin_atualizado['carro']}!")
             else:
                 st.error("POR FAVOR, PREENCHA O KM FINAL.")
     else:
@@ -131,34 +131,32 @@ def app():
         st.title("BEM-VINDO! FAÇA SEU LOGIN")
         
         usuarios = [
-            'COORDENAÇÃO', 'TÉC. LUIZ ANDRÉ', 'TÉC. RAFAEL PORTO', 'TÉC. MARCELO BRITO', 'TÉC. JOSÉ BRAZ', 'ENG. PAULO VICTOR', 'TÉC. AILSON SILVA', 
-            'TÉC. ANDERSON ALVES', 'TÉC. EVELYN FERNANDEZ', 'ENG. LUIZ NEVES', 'ENG. JOSÉ UILIAN', 'ENG. ALTEMAR JÚNIOR', 'ENG. LUAN DEMARCO', 
-            'ADM. VÍTALLO RAONY', 'COORD. GENILSON MEDEIROS'
+            'COORDENAÇÃO', 'TÉC. LUIZ ANDRÉ', 'TÉC. RAFAEL PORTO', 'TÉC. MARCELO BRITO', 'TÉC. JOSÉ BRAZ',
+            'TÉC. ANDERSON ALVES', 'TÉC. AILSON SILVA', 'ADM. VÍTALLO RAONY', 'TÉC. EVELYN FERNANDEZ', 
+            'ENG. PAULO VICTOR', 'ENG. JOSÉ UILIAN', 'ENG. ALTEMAR JÚNIOR', 'ENG. LUAN DEMARCO'
         ]
         
-        usuario = st.selectbox("Escolha seu usuário", usuarios)
-        senha = st.text_input("Digite sua senha", type="password")
+        usuario = st.selectbox("Usuário", usuarios)
+        senha = st.text_input("Senha", type="password")
         
         if st.button("Entrar"):
             if verificar_login(usuario, senha):
                 st.session_state.login = True
                 st.session_state.usuario = usuario
-                st.success("Login bem-sucedido!")
+                st.success(f"Bem-vindo(a), {usuario}!")
             else:
-                st.error("Usuário ou senha inválidos. Tente novamente.")
-    else:
-        # Exibe opções de funcionalidades para os usuários logados
-        usuario = st.session_state.usuario
-
-        if usuario == 'COORDENAÇÃO':
+                st.error("Usuário ou senha inválidos.")
+    
+    if 'login' in st.session_state and st.session_state.login:
+        if st.session_state.usuario == 'COORDENAÇÃO':
             exibir_visualizacao_coordenação()
         else:
             opcao = st.selectbox("Escolha uma opção", ["Check-in", "Check-out"])
-            if opcao == "Check-in":
-                exibir_formulario_checkin(usuario)
-            else:
-                exibir_formulario_checkout(usuario)
 
-# Chama a função principal do aplicativo
-if __name__ == "__main__":
+            if opcao == "Check-in":
+                exibir_formulario_checkin(st.session_state.usuario)
+            elif opcao == "Check-out":
+                exibir_formulario_checkout(st.session_state.usuario)
+
+if __name__ == '__main__':
     app()
