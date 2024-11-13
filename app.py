@@ -78,7 +78,7 @@ def exibir_formulario_checkin(usuario):
 
     if not checkin_aberto.empty:
         usuario_pendente = checkin_aberto.iloc[0]['usuario']
-        st.warning(f"O usuário {usuario_pendente} não realizou check-out para o veículo {carro}. Consulte-o para liberar o check-in.")
+        st.warning(f"O USUÁRIO {usuario_pendente} NÃO REALIZOU CHECK-OUT PARA O VEÍCULO {carro}. CONSULTE-O PARA LIBERAR O SEU CHECK-IN.")
     else:
         # Definir o fuso horário do Amazonas (UTC-4)
         fuso_amazonas = pytz.timezone('America/Manaus')
