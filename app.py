@@ -208,4 +208,4 @@ def app():
 #limpar_planilha()
 
 if __name__ == "__main__":
-    app().
+    app()
