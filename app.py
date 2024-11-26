@@ -184,4 +184,4 @@ def app():
 #limpar_planilha()
 
 if __name__ == "__main__":
-    app(). dessa forma está perfeito o app, mas preciso adicionar algo para controle de combustiveis
+    app().
