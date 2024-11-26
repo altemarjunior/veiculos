@@ -154,6 +154,7 @@ def exibir_formulario_checkout(usuario):
     else:
         st.warning("NÃO HÁ CHECK-IN EM ABERTO PARA ESTE USUÁRIO.")
 
+
 # Função para exibir apenas a visualização de registros para a coordenação
 def exibir_visualizacao_coordenação():
     st.title("Visualização de Registros de Check-in e Check-out")
