@@ -154,12 +154,19 @@ def exibir_formulario_checkout(usuario):
     else:
         st.warning("NÃO HÁ CHECK-IN EM ABERTO PARA ESTE USUÁRIO.")
 
-
 # Função para exibir apenas a visualização de registros para a coordenação
 def exibir_visualizacao_coordenação():
     st.title("Visualização de Registros de Check-in e Check-out")
+    
+    # Carregar os dados existentes
     df = carregar_checkins()
-    st.write(df)
+    
+    if df.empty:
+        st.warning("Nenhum registro encontrado.")
+    else:
+        # Exibir os dados incluindo informações de abastecimento
+        st.dataframe(df)
+
 
 # Função principal do aplicativo
 def app():
