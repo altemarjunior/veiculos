@@ -109,6 +109,7 @@ def exibir_formulario_checkin(usuario):
 
 
 # Função para exibir o formulário de check-out de veículo
+# Função para exibir o formulário de check-out de veículo
 def exibir_formulario_checkout(usuario):
     st.title("CONTROLE DE VEÍCULOS - CHECK-OUT")
 
@@ -119,11 +120,33 @@ def exibir_formulario_checkout(usuario):
         checkin_selecionado = st.selectbox("Escolha o Check-in em Aberto", checkins_abertos.index, format_func=lambda idx: f"{checkins_abertos.loc[idx, 'carro']} - {checkins_abertos.loc[idx, 'origem']} para {checkins_abertos.loc[idx, 'destino']}")
         km_final = st.number_input("KM FINAL", min_value=0)
 
+        # Adicionar campos para registro de abastecimento
+        st.subheader("REGISTRO DE ABASTECIMENTO (Opcional)")
+        abasteceu = st.radio("HOUVE ABASTECIMENTO DURANTE A VIAGEM?", ("Não", "Sim"))
+
+        if abasteceu == "Sim":
+            litros_abastecidos = st.number_input("QUANTIDADE DE LITROS ABASTECIDOS", min_value=0.0, step=0.1, format="%.2f")
+            valor_nota = st.number_input("VALOR TOTAL DA NOTA (R$)", min_value=0.0, step=0.1, format="%.2f")
+
+            if litros_abastecidos > 0 and valor_nota > 0:
+                preco_por_litro = valor_nota / litros_abastecidos
+                st.write(f"PREÇO POR LITRO: R$ {preco_por_litro:.2f}")
+            else:
+                preco_por_litro = None
+                st.warning("INSIRA OS VALORES DE LITROS E DA NOTA PARA CALCULAR O PREÇO POR LITRO.")
+        else:
+            litros_abastecidos = None
+            valor_nota = None
+            preco_por_litro = None
+
         if st.button("REGISTRAR CHECK-OUT"):
             if km_final:
                 checkin_atualizado = checkins_abertos.loc[checkin_selecionado].to_dict()
                 checkin_atualizado['km_final'] = km_final
                 checkin_atualizado['data_hora_checkout'] = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                checkin_atualizado['litros_abastecidos'] = litros_abastecidos
+                checkin_atualizado['valor_nota'] = valor_nota
+                checkin_atualizado['preco_por_litro'] = preco_por_litro
                 atualizar_checkout(checkin_atualizado)
                 st.success(f"CHECK-OUT REALIZADO COM SUCESSO PARA O CARRO {checkin_atualizado['carro']}!")
             else:
