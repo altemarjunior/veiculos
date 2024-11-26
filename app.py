@@ -45,6 +45,19 @@ def atualizar_checkout(checkin_atualizado):
             df.at[index, 'preco_por_litro'] = checkin_atualizado['preco_por_litro']
     df.to_excel('dados_checkin_checkout.xlsx', index=False)
 
+# Função para exibir o formulário de check-in de veículo
+def exibir_formulario_checkin(usuario):
+    st.title("CONTROLE DE VEÍCULOS - CHECK-IN")
+
+    carros_disponiveis = ['HILLUX PRATA - JKE-2B37', 'HILLUX PRATA - NUJ-4B69', 'ONIX - QRA-4B06']
+    carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
+
+    origem = st.text_input("LOCAL DE ORIGEM")
+    destino = st.text_input("LOCAL DE DESTINO")
+
+    if st.button("REGISTRAR CHECK-IN"):
+        st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA {carro}!")
+
 # Função para exibir o formulário de check-out de veículo
 def exibir_formulario_checkout(usuario):
     st.title("CONTROLE DE VEÍCULOS - CHECK-OUT")
@@ -103,7 +116,7 @@ def exibir_visualizacao_coordenação():
 
 # Função principal do aplicativo
 def app():
-    if 'login' not in st.session_state or not st.session_state.login:
+    if 'login' not in st.session_state or not st.session_state.get('login', False):
         st.title("BEM-VINDO! FAÇA SEU LOGIN")
         
         usuarios = [
