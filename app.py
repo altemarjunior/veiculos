@@ -45,6 +45,25 @@ def atualizar_checkout(checkin_atualizado):
             
     df.to_excel('dados_checkin_checkout.xlsx', index=False)
 
+# Função para exibir o formulário de check-in de veículo
+def exibir_formulario_checkin(usuario):
+    st.title("CONTROLE DE VEÍCULOS - CHECK-IN")
+
+    carros_disponiveis = ['HILLUX PRATA - JKE-2B37', 'HILLUX PRATA - NUJ-4B69', 'ONIX - QRA-4B06']
+    carro = st.selectbox("ESCOLHA O VEÍCULO", carros_disponiveis)
+
+    locais = ['ESCRITÓRIO', 'UNIDADE LOCAL', 'POSTO DE COMBUSTÍVEL']
+    origem = st.selectbox("LOCAL DE ORIGEM", locais + ['Outro...'])
+    if origem == 'Outro...':
+        origem = st.text_input("ESCREVA O LOCAL DE ORIGEM", "")
+
+    destino = st.selectbox("LOCAL DE DESTINO", locais + ['Outro...'])
+    if destino == 'Outro...':
+        destino = st.text_input("ESCREVA O LOCAL DE DESTINO", "")
+
+    if st.button("REGISTRAR CHECK-IN"):
+        st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA {carro}!")
+
 # Função para exibir o formulário de check-out de veículo
 def exibir_formulario_checkout(usuario):
     st.title("CONTROLE DE VEÍCULOS - CHECK-OUT")
@@ -90,12 +109,6 @@ def exibir_formulario_checkout(usuario):
     else:
         st.warning("NÃO HÁ CHECK-IN EM ABERTO PARA ESTE USUÁRIO.")
 
-# Função para exibir apenas a visualização de registros para a coordenação
-def exibir_visualizacao_coordenação():
-    st.title("Visualização de Registros de Check-in e Check-out")
-    df = carregar_checkins()
-    st.write(df)
-
 # Função principal do aplicativo
 def app():
     if 'login' not in st.session_state or not st.session_state.login:
@@ -124,7 +137,7 @@ def app():
                 st.error("USUÁRIO OU SENHA INCORRETOS.")
     else:
         if st.session_state.usuario == 'COORDENAÇÃO':
-            exibir_visualizacao_coordenação()
+            st.write("Coordenação - Registros de Check-ins e Check-outs")
         else:
             escolha = st.radio("ESCOLHA UMA OPÇÃO", ('Check-in', 'Check-out'))
             if escolha == 'Check-in':
