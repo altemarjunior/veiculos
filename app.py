@@ -109,7 +109,7 @@ def exibir_formulario_checkin(usuario):
                     "data_hora_checkin": data_hora_checkin,
                 }
                 salvar_checkin(checkin)
-                st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
+                st.success(f"CHECK-IN REALIZADO COM SUCESSO PARA O CARRO {carro}! USE O CINTO DE SEGURANÇA, VERIFIQUE A PRESSÃO DOS PNEUS E RESPEITE OS LIMITES DE VELOCIDADE. BOA VIAGEM")
             else:
                 st.error("POR FAVOR, PREENCHA TODOS OS CAMPOS.")
 
